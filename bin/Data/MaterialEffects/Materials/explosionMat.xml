@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<material>
+	<technique name="Techniques/DiffUnlitAlphaMask.xml" quality="0" loddistance="0" />
+	<texture unit="diffuse" name="MaterialEffects/Textures/explosion2/explosion001.png" />
+	<texture unit="specular" name="MaterialEffects/Textures/explosion2/explosionEdgeMask.png" />
+	<parameter name="MatDiffColor" value="1 1 1 1" />
+	<parameter name="MinAlpha" value="0.1" />
+	<parameter name="MultAddEmission" value="0.1" />
+	<parameter name="MaskEdges" value="1" />
+</material>
