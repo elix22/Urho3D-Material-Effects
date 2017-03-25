@@ -3,7 +3,7 @@
 
 Description
 -----------------------------------------------------------------------------------
-Basic material and techniques used for rendering effects in Urho3D. It might be useful for individuals new to Urho3D.
+Basic material and techniques used for rendering effects, it might be useful for individuals new to Urho3D.
 
 
 Screenshots
