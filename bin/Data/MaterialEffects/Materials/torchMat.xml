@@ -4,7 +4,8 @@
 	<texture unit="diffuse" name="MaterialEffects/Textures/torch2/torch058.png" />
 	<parameter name="MatDiffColor" value="1 1 1 1" />
 	<parameter name="MatEmissiveColor" value="1 1 1 1" />
-	<parameter name="MinAlpha" value="0.1" />
+	<parameter name="MinSumColor" value="0.7" />
+	<parameter name="MaxAlpha" value="0.8" />
 	<parameter name="MultAddEmission" value="0.0" />
 	<parameter name="MaskEdges" value="0" />
 </material>

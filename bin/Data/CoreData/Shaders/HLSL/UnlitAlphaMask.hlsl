@@ -3,7 +3,8 @@
 #include "Transform.hlsl"
 #include "Fog.hlsl"
 
-uniform float cMinAlpha;
+uniform float cMinSumColor;
+uniform float cMaxAlpha;
 uniform float cMultAddEmission;
 uniform float cMaskEdges;
 
@@ -84,31 +85,18 @@ void PS(float2 iTexCoord : TEXCOORD0,
 
         #ifdef ALPHAMASK
             float sumColor = diffColor.r + diffColor.g + diffColor.b;
-
-            if (sumColor > 1.0)
-                sumColor = 1.0;
-
-            sumColor -= cMinAlpha;
-
-            if (sumColor < 0.0)
-                sumColor = 0.0;
-
-            diffColor.a = sumColor;
+            diffColor.a = clamp(sumColor - cMinSumColor, 0.0, min(cMaxAlpha, 1.0));
 
             // add self emission
             if (cMultAddEmission > 0.0)
             {
-                if (diffColor.a > cMinAlpha)
-                {
-                    diffColor.xyz *= (1.0 + cMultAddEmission);
-                }
+                diffColor.rgb *= (1.0 + cMultAddEmission);
             }
 
             // clean up around the edges
             if (cMaskEdges > 0.0)
             {
-                float4 edgeColor = Sample2D(SpecMap, iTexCoord);
-                diffColor.a *= edgeColor.a;
+                diffColor.a *= Sample2D(SpecMap, iTexCoord).a;
             }
         #endif
 
