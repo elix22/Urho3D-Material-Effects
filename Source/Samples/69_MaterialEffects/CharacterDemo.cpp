@@ -101,6 +101,9 @@ CharacterDemo::CharacterDemo(Context* context)
     fireIdx_ = 45;
     fireBegIdx_ = 45;
     fireEndIdx_ = 138;
+
+    // lava
+    lavaVOffset_ = 0.0f;
 }
 
 CharacterDemo::~CharacterDemo()
@@ -326,6 +329,7 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     UpdateVertexColor(timeStep);
     UpdateTranspPlate(timeStep);
     UpdateTorch(timeStep);
+    UpdateLava(timeStep);
 
     // Toggle debug geometry with space
     if (input->GetKeyPress(KEY_F4))
@@ -618,4 +622,21 @@ void CharacterDemo::UpdateTorch(float timeStep)
 
 }
 
+void CharacterDemo::UpdateLava(float timeStep)
+{
+    // scroll v - down
+    lavaVOffset_ -= 0.00002f + timeStep * 0.01f;
+    if (lavaVOffset_ < 0.0f)
+    {
+        lavaVOffset_ = 1.0f;
+    }
+
+    Node *lavaNode = scene_->GetChild("lava", true);
+
+    if (lavaNode)
+    {
+        Material *mat = lavaNode->GetComponent<StaticModel>()->GetMaterial();
+        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, lavaVOffset_));
+    }
+}
 

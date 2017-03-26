@@ -136,6 +136,7 @@ protected:
     void UpdateVertexColor(float timeStep);
     void UpdateTranspPlate(float timeStep);
     void UpdateTorch(float timeStep);
+    void UpdateLava(float timeStep);
 
 protected:
     /// Touch utility object.
@@ -184,6 +185,9 @@ protected:
     int    fireBegIdx_;
     int    fireEndIdx_;
     Timer  fireTimer_;
+
+    // lava
+    float lavaVOffset_;
 
     Vector3 wallHitNormal_;
     bool drawDebug_;
