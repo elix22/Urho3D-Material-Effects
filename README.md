@@ -9,6 +9,7 @@ Basic material and techniques used for rendering effects, it might be useful for
 Screenshots
 -----------------------------------------------------------------------------------
 ![alt tag](https://github.com/Lumak/Urho3D-Material-Effects/blob/master/screenshot/mateffects.jpg)
+![alt tag](https://github.com/Lumak/Urho3D-Material-Effects/blob/master/screenshot/lava.jpg)
 
 
 To Build
