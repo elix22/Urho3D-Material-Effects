@@ -104,6 +104,11 @@ CharacterDemo::CharacterDemo(Context* context)
 
     // lava
     lavaVOffset_ = 0.0f;
+
+    // waterfall
+    waterfall1VOffset_ = 0.0f;
+    waterfall2VOffset_ = 0.0f;
+    watergroundVOffset_ = 0.0f;
 }
 
 CharacterDemo::~CharacterDemo()
@@ -131,6 +136,8 @@ void CharacterDemo::Start()
 
     // Create static scene content
     CreateScene();
+
+    CreateWaterRefection();
 
     // Create the controllable character
     CreateCharacter();
@@ -236,6 +243,40 @@ void CharacterDemo::CreateCharacter()
     character_ = objectNode->CreateComponent<Character>();
 }
 
+void CharacterDemo::CreateWaterRefection()
+{
+    // right out of 23_Water sample
+    Graphics* graphics = GetSubsystem<Graphics>();
+    Renderer* renderer = GetSubsystem<Renderer>();
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    waterNode_ = scene_->GetChild("waterGround", true);
+    waterNode_->GetComponent<StaticModel>()->SetViewMask(0x80000000);
+
+    waterPlane_ = Plane(waterNode_->GetWorldRotation() * Vector3(0.0f, 1.0f, 0.0f), waterNode_->GetWorldPosition());
+    waterClipPlane_ = Plane(waterNode_->GetWorldRotation() * Vector3(0.0f, 1.0f, 0.0f), waterNode_->GetWorldPosition() - Vector3(0.0f, 0.1f, 0.0f));
+
+    reflectionCameraNode_ = cameraNode_->CreateChild();
+    Camera* reflectionCamera = reflectionCameraNode_->CreateComponent<Camera>();
+    reflectionCamera->SetFarClip(750.0);
+    reflectionCamera->SetViewMask(0x7fffffff); // Hide objects with only bit 31 in the viewmask (the water plane)
+    reflectionCamera->SetAutoAspectRatio(false);
+    reflectionCamera->SetUseReflection(true);
+    reflectionCamera->SetReflectionPlane(waterPlane_);
+    reflectionCamera->SetUseClipping(true); // Enable clipping of geometry behind water plane
+    reflectionCamera->SetClipPlane(waterClipPlane_);
+    reflectionCamera->SetAspectRatio((float)graphics->GetWidth() / (float)graphics->GetHeight());
+
+    int texSize = 1024;
+    SharedPtr<Texture2D> renderTexture(new Texture2D(context_));
+    renderTexture->SetSize(texSize, texSize, Graphics::GetRGBFormat(), TEXTURE_RENDERTARGET);
+    renderTexture->SetFilterMode(FILTER_BILINEAR);
+    RenderSurface* surface = renderTexture->GetRenderSurface();
+    SharedPtr<Viewport> rttViewport(new Viewport(context_, scene_, reflectionCamera));
+    surface->SetViewport(0, rttViewport);
+    Material* waterMat = cache->GetResource<Material>("MaterialEffects/Materials/waterGroundMat.xml");
+    waterMat->SetTexture(TU_SPECULAR, renderTexture);
+
+}
 void CharacterDemo::CreateInstructions()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
@@ -330,10 +371,17 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     UpdateTranspPlate(timeStep);
     UpdateTorch(timeStep);
     UpdateLava(timeStep);
+    UpdateWaterfall(timeStep);
 
     // Toggle debug geometry with space
     if (input->GetKeyPress(KEY_F4))
         drawDebug_ = !drawDebug_;
+
+    // In case resolution has changed, adjust the reflection camera aspect ratio
+    Graphics* graphics = GetSubsystem<Graphics>();
+    Camera* reflectionCamera = reflectionCameraNode_->GetComponent<Camera>();
+    reflectionCamera->SetAspectRatio((float)graphics->GetWidth() / (float)graphics->GetHeight());
+
 }
 
 void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
@@ -637,6 +685,37 @@ void CharacterDemo::UpdateLava(float timeStep)
     {
         Material *mat = lavaNode->GetComponent<StaticModel>()->GetMaterial();
         mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, lavaVOffset_));
+    }
+}
+
+void CharacterDemo::UpdateWaterfall(float timeStep)
+{
+    // scroll v - down
+    waterfall1VOffset_ -= 0.003f + timeStep * 0.1f;
+    if (waterfall1VOffset_ < 0.0f)
+    {
+        waterfall1VOffset_ = 1.0f;
+    }
+
+    Node *waterfallNode = scene_->GetChild("waterfall1", true);
+
+    if (waterfallNode)
+    {
+        Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
+        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall1VOffset_));
+    }
+
+    waterfall2VOffset_ -= 0.001f + timeStep * 0.1f;
+    if (waterfall2VOffset_ < 0.0f)
+    {
+        waterfall2VOffset_ = 1.0f;
+    }
+    waterfallNode = scene_->GetChild("waterfall2", true);
+
+    if (waterfallNode)
+    {
+        Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
+        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall2VOffset_));
     }
 }
 

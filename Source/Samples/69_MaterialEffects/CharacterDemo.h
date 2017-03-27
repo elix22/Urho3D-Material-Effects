@@ -131,12 +131,15 @@ protected:
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
     void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 
+    void CreateWaterRefection();
+
     void UpdateEmission(float timeStep);
     void UpdateLightmap(float timeStep);
     void UpdateVertexColor(float timeStep);
     void UpdateTranspPlate(float timeStep);
     void UpdateTorch(float timeStep);
     void UpdateLava(float timeStep);
+    void UpdateWaterfall(float timeStep);
 
 protected:
     /// Touch utility object.
@@ -188,6 +191,18 @@ protected:
 
     // lava
     float lavaVOffset_;
+
+    // waterfall
+    float waterfall1VOffset_;
+    float waterfall2VOffset_;
+    float watergroundVOffset_;
+    bool  watergroundMoveFwd_;
+
+    // water reflection
+    SharedPtr<Node> reflectionCameraNode_;
+    SharedPtr<Node> waterNode_;
+    Plane waterPlane_;
+    Plane waterClipPlane_;
 
     Vector3 wallHitNormal_;
     bool drawDebug_;
