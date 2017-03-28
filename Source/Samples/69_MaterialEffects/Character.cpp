@@ -303,7 +303,7 @@ void Character::HandleAnimationTrigger(StringHash eventType, VariantMap& eventDa
 
             if (inWater_)
             {
-                pos.y_ += waterContatct_.y_;
+                pos.y_ = waterContatct_.y_;
                 SendSplashEvent(pos, fwd);
             }
         }

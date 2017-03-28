@@ -171,7 +171,7 @@ void SplashHandler::HandleSplashEvent(StringHash eventType, VariantMap& eventDat
 
                 newSplashData->node = GetScene()->CreateChild();
                 newSplashData->node->SetPosition(pos);
-                newSplashData->node->SetDirection(Vector3::UP);
+                newSplashData->node->SetDirection(Vector3::DOWN);
 
                 if (CreateDrawableObj(newSplashData))
                 {
