@@ -83,20 +83,6 @@ void Character::Start()
 
     // Component has been inserted into its scene node. Subscribe to events now
     SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Character, HandleNodeCollision));
-
-    // create footsplash nodes
-    ResourceCache* cache = node_->GetSubsystem<ResourceCache>();
-    XMLFile* xml = cache->GetResource<XMLFile>("MaterialEffects/watersplash.xml");
-
-    if (xml)
-    {
-        Vector3 pos;
-        Quaternion rot;
-        rgtFootNode_ = node_->GetScene()->InstantiateXML(xml->GetRoot(), pos, rot);
-        rgtFootNode_->SetEnabled(false);
-        lftFootNode_ = node_->GetScene()->InstantiateXML(xml->GetRoot(), pos, rot);
-        lftFootNode_->SetEnabled(false);
-    }
 }
 
 void Character::FixedUpdate(float timeStep)
@@ -305,6 +291,7 @@ void Character::HandleAnimationTrigger(StringHash eventType, VariantMap& eventDa
     String strAction = eventData[P_DATA].GetString();
 
     // footsetp
+    if (strAction.Find("foot", 0, false) != String::NPOS)
     {
         // footstep particle
         Node *footNode = node_->GetChild(strAction, true);

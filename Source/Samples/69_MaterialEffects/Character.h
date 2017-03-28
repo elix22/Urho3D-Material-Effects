@@ -106,13 +106,4 @@ protected:
     bool inWater_;
     Vector3 waterContatct_;
 
-    // footsetp
-    WeakPtr<Node> rgtFootNode_;
-    WeakPtr<Node> lftFootNode_;
-    int rgtFootIdx_;
-    int lftFootIdx_;
-    Timer rgtFootTimer_;
-    Timer leftFootTimer_;
-
-
 };
