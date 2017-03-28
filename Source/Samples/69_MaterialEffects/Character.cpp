@@ -22,6 +22,8 @@
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Graphics/AnimationController.h>
+#include <Urho3D/Graphics/DrawableEvents.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/IO/MemoryBuffer.h>
 #include <Urho3D/Physics/PhysicsEvents.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
@@ -29,9 +31,13 @@
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Scene/SceneEvents.h>
 #include <Urho3D/Math/Ray.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Resource/XMLFile.h>
 #include <SDL/SDL_log.h>
 
 #include "Character.h"
+#include "SplashHandler.h"
+#include "CollisionLayer.h"
 
 #include <Urho3D/DebugNew.h>
 //=============================================================================
@@ -71,8 +77,26 @@ void Character::Start()
     AnimationController* animCtrl = node_->GetComponent<AnimationController>(true);
     animCtrl->PlayExclusive("Platforms/Models/BetaLowpoly/Beta_JumpLoop1.ani", 0, true, 0.0f);
 
+    // anim trigger event
+    AnimatedModel *animModel = node_->GetComponent<AnimatedModel>(true);
+    SubscribeToEvent(animModel->GetNode(), E_ANIMATIONTRIGGER, URHO3D_HANDLER(Character, HandleAnimationTrigger));
+
     // Component has been inserted into its scene node. Subscribe to events now
     SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Character, HandleNodeCollision));
+
+    // create footsplash nodes
+    ResourceCache* cache = node_->GetSubsystem<ResourceCache>();
+    XMLFile* xml = cache->GetResource<XMLFile>("MaterialEffects/watersplash.xml");
+
+    if (xml)
+    {
+        Vector3 pos;
+        Quaternion rot;
+        rgtFootNode_ = node_->GetScene()->InstantiateXML(xml->GetRoot(), pos, rot);
+        rgtFootNode_->SetEnabled(false);
+        lftFootNode_ = node_->GetScene()->InstantiateXML(xml->GetRoot(), pos, rot);
+        lftFootNode_->SetEnabled(false);
+    }
 }
 
 void Character::FixedUpdate(float timeStep)
@@ -222,6 +246,7 @@ void Character::FixedUpdate(float timeStep)
 
     // Reset grounded flag for next frame
     onGround_ = false;
+    inWater_ = false;
 }
 
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
@@ -229,9 +254,20 @@ void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
     // Check collision contacts and see if character is standing on ground (look for a contact that has near vertical normal)
     using namespace NodeCollision;
 
-    // ignore triggers
-    if (((RigidBody*)eventData[P_OTHERBODY].GetVoidPtr())->IsTrigger() )
-        return;
+    // handle triggers
+    RigidBody *otherBody = (RigidBody*)eventData[P_OTHERBODY].GetVoidPtr();
+    bool isWater = false;
+    if (otherBody->IsTrigger())
+    {
+        if (otherBody->GetCollisionLayer() == ColLayer_Water)
+        {
+            isWater = true;
+        }
+        else
+        {
+            return;
+        }
+    }
 
     MemoryBuffer contacts(eventData[P_CONTACTS].GetBuffer());
 
@@ -245,9 +281,55 @@ void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
         // If contact is below node center and pointing up, assume it's a ground contact
         if (contactPosition.y_ < (node_->GetPosition().y_ + 1.0f))
         {
+            if (isWater)
+            {
+                waterContatct_ = contactPosition;
+                inWater_ = true;
+                break;
+            }
+
             float level = contactNormal.y_;
             if (level > 0.75)
+            {
                 onGround_ = true;
+            }
         }
     }
+}
+
+void Character::HandleAnimationTrigger(StringHash eventType, VariantMap& eventData)
+{
+    using namespace AnimationTrigger;
+
+    Animation *animation = (Animation*)eventData[P_ANIMATION].GetVoidPtr();
+    String strAction = eventData[P_DATA].GetString();
+
+    // footsetp
+    {
+        // footstep particle
+        Node *footNode = node_->GetChild(strAction, true);
+
+        if (footNode)
+        {
+            Vector3 fwd = node_->GetWorldDirection();
+            Vector3 pos = footNode->GetWorldPosition();// + Vector3(0.0, 0.2f, 0.0f);
+
+            if (inWater_)
+            {
+                pos.y_ += waterContatct_.y_;
+                SendSplashEvent(pos, fwd);
+            }
+        }
+    }
+}
+
+void Character::SendSplashEvent(const Vector3 &pos, const Vector3 &dir)
+{
+    using namespace SplashEvent;
+
+    VariantMap& eventData = GetEventDataMap();
+    eventData[P_POS] = pos;
+    eventData[P_DIR] = dir;
+    eventData[P_SPL1] = Splash_Ripple;
+    SendEvent(E_SPLASH, eventData);
 }

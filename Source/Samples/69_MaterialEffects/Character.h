@@ -81,10 +81,13 @@ public:
 protected:
     /// Handle physics collision event.
     void HandleNodeCollision(StringHash eventType, VariantMap& eventData);
+    void HandleAnimationTrigger(StringHash eventType, VariantMap& eventData);
+    void SendSplashEvent(const Vector3 &pos, const Vector3 &dir);
     
 protected:
     /// Grounded flag for movement.
     bool onGround_;
+
     /// Jump flag.
     bool okToJump_;
     /// In air timer. Due to possible physics inaccuracy, character can be off ground for max. 1/10 second and still be allowed to move.
@@ -98,6 +101,18 @@ protected:
     // platform
     bool onMovingPlatform_;
     WeakPtr<RigidBody> platformBody_;
+
+    // water contact
+    bool inWater_;
+    Vector3 waterContatct_;
+
+    // footsetp
+    WeakPtr<Node> rgtFootNode_;
+    WeakPtr<Node> lftFootNode_;
+    int rgtFootIdx_;
+    int lftFootIdx_;
+    Timer rgtFootTimer_;
+    Timer leftFootTimer_;
 
 
 };

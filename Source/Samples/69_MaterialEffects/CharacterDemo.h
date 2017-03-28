@@ -121,6 +121,7 @@ protected:
     void ChangeDebugHudText();
     /// Create controllable character.
     void CreateCharacter();
+    void InitSplashHandler();
     /// Construct an instruction text to the UI.
     void CreateInstructions();
     /// Subscribe to necessary events.
@@ -140,6 +141,7 @@ protected:
     void UpdateTorch(float timeStep);
     void UpdateLava(float timeStep);
     void UpdateWaterfall(float timeStep);
+    void UpdatePoolwater(float timeStep);
 
 protected:
     /// Touch utility object.
@@ -204,6 +206,7 @@ protected:
     Plane waterPlane_;
     Plane waterClipPlane_;
 
+    // dbg
     Vector3 wallHitNormal_;
     bool drawDebug_;
 };

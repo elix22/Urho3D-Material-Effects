@@ -38,7 +38,7 @@ enum CollisionLayerType
     ColLayer_None       = (0),
 
     ColLayer_Static     = (1<<0), // 1
-    ColLayer_Unused     = (1<<1), // 2 -- previously thought Bullet used this as kinematic layer, turns out Bullet has a kinematic collision flag=2
+    ColLayer_Water      = (1<<1), // 2
 
     ColLayer_Character  = (1<<2), // 4
 

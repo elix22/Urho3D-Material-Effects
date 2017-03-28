@@ -112,5 +112,5 @@ void PS(
     float3 finalColor = lerp(surfaceCol, reflectColor, fresnel);
     finalColor = lerp(finalColor, refractColor, 1.0 - cMatDiffColor.a);
 
-    oColor = float4(GetFog(finalColor, GetFogFactor(iEyeVec.w)), 1.0);
+    oColor = float4(GetFog(finalColor, GetFogFactor(iEyeVec.w)), cMatDiffColor.a);
 }

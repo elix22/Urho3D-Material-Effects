@@ -79,5 +79,5 @@ void PS()
     vec3 finalColor = mix(surfaceCol, reflectColor, fresnel);
     finalColor = mix(finalColor, refractColor, 1.0 - cMatDiffColor.a);
 
-    gl_FragColor = vec4(GetFog(finalColor, GetFogFactor(vEyeVec.w)), 1.0);
+    gl_FragColor = vec4(GetFog(finalColor, GetFogFactor(vEyeVec.w)), cMatDiffColor.a);
 }

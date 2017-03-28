@@ -395,13 +395,14 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="waterGroundCol" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="8.34918 -0.00531464 -17.1966" />
+		<attribute name="Position" value="8.34918 0.3 -17.1966" />
 		<attribute name="Rotation" value="1 0 0 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="RigidBody" id="60">
-			<attribute name="Physics Position" value="8.34918 -0.00531464 -17.1966" />
+			<attribute name="Physics Position" value="8.34918 0.3 -17.1966" />
 			<attribute name="Is Trigger" value="true" />
+			<attribute name="Collision Layer" value="2" />
 		</component>
 		<component type="CollisionShape" id="61">
 			<attribute name="Size" value="23 1 11" />

@@ -54,6 +54,7 @@
 
 #include "Character.h"
 #include "CharacterDemo.h"
+#include "SplashHandler.h"
 #include "Touch.h"
 #include "CollisionLayer.h"
 
@@ -69,6 +70,7 @@ CharacterDemo::CharacterDemo(Context* context)
     , firstPerson_(false)
     , drawDebug_(false)
 {
+    SplashHandler::RegisterObject(context);
     Character::RegisterObject(context);
 
     // emission
@@ -109,6 +111,7 @@ CharacterDemo::CharacterDemo(Context* context)
     waterfall1VOffset_ = 0.0f;
     waterfall2VOffset_ = 0.0f;
     watergroundVOffset_ = 0.0f;
+
 }
 
 CharacterDemo::~CharacterDemo()
@@ -136,6 +139,7 @@ void CharacterDemo::Start()
 
     // Create static scene content
     CreateScene();
+    InitSplashHandler();
 
     CreateWaterRefection();
 
@@ -201,8 +205,14 @@ void CharacterDemo::CreateScene()
     //viewport->SetRenderPath(effectRenderPath);
 
     // load scene
-    File loadFile(context_, GetSubsystem<FileSystem>()->GetProgramDir() + "Data/MaterialEffects/Level1.xml", FILE_READ);
-    scene_->LoadXML(loadFile);
+    XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/Level1.xml");
+    scene_->LoadXML(xmlLevel->GetRoot());
+}
+
+void CharacterDemo::InitSplashHandler()
+{
+    SplashHandler *splashHandler = scene_->CreateComponent<SplashHandler>();
+    splashHandler->LoadSplashList("Data/MaterialEffects/SplashData/splashDataList.xml");
 }
 
 void CharacterDemo::CreateCharacter()
@@ -434,6 +444,13 @@ void CharacterDemo::HandlePostRenderUpdate(StringHash eventType, VariantMap& eve
 
 void CharacterDemo::UpdateEmission(float timeStep)
 {
+    Node *emissionNode = scene_->GetChild("emissionSphere1");
+    if (emissionNode)
+    {
+        if (!emissionNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
+            return;
+    }
+
     timeStep *= 2.0f;
     switch (emissionState_)
     {
@@ -470,8 +487,6 @@ void CharacterDemo::UpdateEmission(float timeStep)
             emissionState_ = ++emissionState_ % EmissionState_MAX;
         }
     }
-
-    Node *emissionNode = scene_->GetChild("emissionSphere1");
 
     if (emissionNode)
     {
@@ -527,6 +542,9 @@ void CharacterDemo::UpdateVertexColor(float timeStep)
 
         if (vcolsphNode)
         {
+            if (!vcolsphNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
+                return;
+
             Model *model = vcolsphNode->GetComponent<StaticModel>()->GetModel();
             Geometry *geometry = model->GetGeometry(0, 0);
             const Vector<SharedPtr<VertexBuffer> > &vbuffers = model->GetVertexBuffers();
@@ -569,31 +587,29 @@ void CharacterDemo::UpdateVertexColor(float timeStep)
 void CharacterDemo::UpdateTranspPlate(float timeStep)
 {
     // scroll u - right
-    plateUOffset_ -= 0.002f + timeStep;
-    if (plateUOffset_ < 0.0f)
-    {
-        plateUOffset_ = 1.0f;
-    }
-
     Node *transpPlateNode = scene_->GetChild("transpPlateU", true);
-
-    if (transpPlateNode)
+    if (transpPlateNode && transpPlateNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
+        plateUOffset_ -= 0.002f + timeStep;
+        if (plateUOffset_ < 0.0f)
+        {
+            plateUOffset_ = 1.0f;
+        }
+
         Material *mat = transpPlateNode->GetComponent<StaticModel>()->GetMaterial();
         mat->SetShaderParameter("UOffset", Vector4(1.0f, 0.0f, 0.0f, plateUOffset_));
     }
 
     // scroll v - down
-    plateVOffset_ -= 0.002f + timeStep;
-    if (plateVOffset_ < 0.0f)
-    {
-        plateVOffset_ = 1.0f;
-    }
-
     transpPlateNode = scene_->GetChild("transpPlateV", true);
-
-    if (transpPlateNode)
+    if (transpPlateNode && transpPlateNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
+        plateVOffset_ -= 0.002f + timeStep;
+        if (plateVOffset_ < 0.0f)
+        {
+            plateVOffset_ = 1.0f;
+        }
+
         Material *mat = transpPlateNode->GetComponent<StaticModel>()->GetMaterial();
         mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, plateVOffset_));
     }
@@ -601,71 +617,70 @@ void CharacterDemo::UpdateTranspPlate(float timeStep)
 
 void CharacterDemo::UpdateTorch(float timeStep)
 {
-    if (torchTimer_.GetMSec(false) > 40)
+    Node *filmNode = scene_->GetChild("Torch", true);
+    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
-        if (++torchIdx_ > torchEndIdx_)
+        if (torchTimer_.GetMSec(false) > 40)
         {
-            torchIdx_ = torchBegIdx_;
-        }
-        char buf[10];
-        sprintf(buf, "%03d.png", torchIdx_);
-        String diffName = torchPathName_ + String(buf);
+            if (++torchIdx_ > torchEndIdx_)
+            {
+                torchIdx_ = torchBegIdx_;
+            }
+            char buf[10];
+            sprintf(buf, "%03d.png", torchIdx_);
+            String diffName = torchPathName_ + String(buf);
 
-        Node *torchNode = scene_->GetChild("Torch", true);
-
-        // update texture
-        if (torchNode)
-        {
+            // update texture
             ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = torchNode->GetComponent<BillboardSet>()->GetMaterial();
+            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
             mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-        }
 
-        torchTimer_.Reset();
+            torchTimer_.Reset();
+        }
     }
 
-    if (explosionTimer_.GetMSec(false) > 20)
+    filmNode = scene_->GetChild("explosion", true);
+    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
-        if (++explosionIdx_ > explosionEndIdx_)
+        if (explosionTimer_.GetMSec(false) > 20)
         {
-            explosionIdx_ = explosionBegIdx_;
-        }
-        char buf[10];
-        sprintf(buf, "%03d.png", explosionIdx_);
-        String diffName = explosionPathName_ + String(buf);
-        Node *explosionNode = scene_->GetChild("explosion", true);
+            if (++explosionIdx_ > explosionEndIdx_)
+            {
+                explosionIdx_ = explosionBegIdx_;
+            }
+            char buf[10];
+            sprintf(buf, "%03d.png", explosionIdx_);
+            String diffName = explosionPathName_ + String(buf);
 
-        // update texture
-        if (explosionNode)
-        {
+            // update texture
             ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = explosionNode->GetComponent<BillboardSet>()->GetMaterial();
+            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
             mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-        }
 
-        explosionTimer_.Reset();
+            explosionTimer_.Reset();
+        }
     }
 
-    if (fireTimer_.GetMSec(false) > 20)
+    filmNode = scene_->GetChild("bgfire", true);
+    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
-        if (++fireIdx_ > fireEndIdx_)
+        if (fireTimer_.GetMSec(false) > 20)
         {
-            fireIdx_ = fireBegIdx_;
-        }
-        char buf[10];
-        sprintf(buf, "%03d.png", fireIdx_);
-        String diffName = firePathName_ + String(buf);
-        Node *fireNode = scene_->GetChild("bgfire", true);
+            if (++fireIdx_ > fireEndIdx_)
+            {
+                fireIdx_ = fireBegIdx_;
+            }
+            char buf[10];
+            sprintf(buf, "%03d.png", fireIdx_);
+            String diffName = firePathName_ + String(buf);
 
-        // update texture
-        if (fireNode)
-        {
+            // update texture
             ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = fireNode->GetComponent<BillboardSet>()->GetMaterial();
+            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
             mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-        }
 
-        fireTimer_.Reset();
+            fireTimer_.Reset();
+        }
     }
 
 }
@@ -673,16 +688,16 @@ void CharacterDemo::UpdateTorch(float timeStep)
 void CharacterDemo::UpdateLava(float timeStep)
 {
     // scroll v - down
-    lavaVOffset_ -= 0.00002f + timeStep * 0.01f;
-    if (lavaVOffset_ < 0.0f)
-    {
-        lavaVOffset_ = 1.0f;
-    }
-
     Node *lavaNode = scene_->GetChild("lava", true);
-
-    if (lavaNode)
+    if (lavaNode && lavaNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
+
+        lavaVOffset_ -= 0.00002f + timeStep * 0.01f;
+        if (lavaVOffset_ < 0.0f)
+        {
+            lavaVOffset_ = 1.0f;
+        }
+
         Material *mat = lavaNode->GetComponent<StaticModel>()->GetMaterial();
         mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, lavaVOffset_));
     }
@@ -690,32 +705,34 @@ void CharacterDemo::UpdateLava(float timeStep)
 
 void CharacterDemo::UpdateWaterfall(float timeStep)
 {
-    // scroll v - down
-    waterfall1VOffset_ -= 0.003f + timeStep * 0.1f;
-    if (waterfall1VOffset_ < 0.0f)
+    Node *waterfallNode = scene_->GetChild("waterfall2", true);
+    if (waterfallNode && waterfallNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
     {
-        waterfall1VOffset_ = 1.0f;
-    }
+        // scroll v - down
+        waterfall1VOffset_ -= 0.003f + timeStep * 0.1f;
+        if (waterfall1VOffset_ < 0.0f)
+        {
+            waterfall1VOffset_ = 1.0f;
+        }
 
-    Node *waterfallNode = scene_->GetChild("waterfall1", true);
-
-    if (waterfallNode)
-    {
         Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
         mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall1VOffset_));
-    }
 
-    waterfall2VOffset_ -= 0.001f + timeStep * 0.1f;
-    if (waterfall2VOffset_ < 0.0f)
-    {
-        waterfall2VOffset_ = 1.0f;
-    }
-    waterfallNode = scene_->GetChild("waterfall2", true);
 
-    if (waterfallNode)
-    {
-        Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
-        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall2VOffset_));
+        // waterfall #2
+        waterfall2VOffset_ -= 0.001f + timeStep * 0.1f;
+        if (waterfall2VOffset_ < 0.0f)
+        {
+            waterfall2VOffset_ = 1.0f;
+        }
+        waterfallNode = scene_->GetChild("waterfall1", true);
+
+        if (waterfallNode)
+        {
+            Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
+            mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall2VOffset_));
+        }
     }
 }
+
 
