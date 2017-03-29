@@ -398,6 +398,7 @@
 		<component type="CollisionShape" id="61">
 			<attribute name="Shape Type" value="TriangleMesh" />
 			<attribute name="Model" value="Model;MaterialEffects/Models/pPlane4.mdl" />
+			<attribute name="Offset Position" value="0 -0.037 0" />
 		</component>
 
 	</node>
