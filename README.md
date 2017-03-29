@@ -13,6 +13,9 @@ Screenshots
 ![alt tag](https://github.com/Lumak/Urho3D-Material-Effects/blob/master/screenshot/waterfall.jpg)
 ![alt tag](https://github.com/Lumak/Urho3D-Material-Effects/blob/master/screenshot/runwatersplash.jpg)
 
+using waterGroundSandMat:
+![alt tag](https://github.com/Lumak/Urho3D-Material-Effects/blob/master/screenshot/waternewmat.jpg)
+
 
 To Build
 -----------------------------------------------------------------------------------
