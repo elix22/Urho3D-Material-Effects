@@ -11,5 +11,5 @@
     <parameter name="NoiseStrength" value="0.2" />
     <parameter name="FresnelPower" value="4" />
     <parameter name="WaterTint" value="0.6 0.6 1" />
-    <parameter name="BumpWaveOpacity" value="0.9" />
+    <parameter name="BumpWaveOpacity" value="0.85" />
 </material>
