@@ -368,7 +368,7 @@
 		<attribute name="Variables" />
 		<component type="StaticModel" id="12">
 			<attribute name="Model" value="Model;MaterialEffects/Models/pPlane1.mdl" />
-			<attribute name="Material" value="Material;MaterialEffects/Materials/redCliffMat.xml" />
+			<attribute name="Material" value="Material;MaterialEffects/Materials/whiteCliffMat.xml" />
 		</component>
 		<component type="RigidBody" id="55">
 			<attribute name="Physics Position" value="8.38338 11.7011 -13.4054" />
