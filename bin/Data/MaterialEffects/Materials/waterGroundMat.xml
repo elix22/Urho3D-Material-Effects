@@ -5,11 +5,11 @@
     <texture unit="normal" name="MaterialEffects/Textures/waterfall/wave_normal.png" />
 
 	<parameter name="MatDiffColor" value="1 1 1 0.9" />
-    <parameter name="DiffTiling" value="2.0" />
+    <parameter name="DiffTiling" value="1.0" />
     <parameter name="NoiseSpeed" value="0.02 0.1 -0.017 -0.03" />
-    <parameter name="NoiseTiling" value="1.7" />
+    <parameter name="NoiseTiling" value="1.0" />
     <parameter name="NoiseStrength" value="0.2" />
-    <parameter name="FresnelPower" value="3" />
+    <parameter name="FresnelPower" value="4" />
     <parameter name="WaterTint" value="0.6 0.6 1" />
-    <parameter name="BumpWaveOpacity" value="0.8" />
+    <parameter name="BumpWaveOpacity" value="0.9" />
 </material>
