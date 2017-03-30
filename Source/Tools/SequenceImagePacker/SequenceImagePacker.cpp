@@ -46,22 +46,25 @@ void Run(Vector<String>& arguments);
 
 //=============================================================================
 //=============================================================================
-const char *getSequenceDecFormat(int idx)
+const char *getSequenceDecFormat(int idx, bool leadingZero)
 {
-    const char *dec1Format = "%01d";
-    const char *dec2Format = "%02d";
-    const char *dec3Format = "%03d";
+    const char *dec1Format = "%1d";
+    const char *dec2Format = "%2d";
+    const char *dec3Format = "%3d";
+    const char *dec01Format = "%01d";
+    const char *dec02Format = "%02d";
+    const char *dec03Format = "%03d";
 
     if (idx == 1)
     {
-        return dec1Format;
+        return leadingZero?dec01Format:dec1Format;
     }
     else if (idx == 2)
     {
-        return dec2Format;
+        return leadingZero?dec02Format:dec2Format;
     }
 
-    return dec3Format;
+    return leadingZero?dec03Format:dec3Format;
 }
 
 //=============================================================================
@@ -80,7 +83,7 @@ void Help(const String &message = String::EMPTY)
               "-sx seq image filename ext, e.g. jpg, png, bmp, etc.\n"
               "-ss seq start num\n"
               "-se seq end num\n"
-              "-sf seq digit format(e.g. fire001.png = 3 digit format), range[1,3] (default = 1)\n"
+              "-sf seq digit format(e.g. fire001.png = 03, leading zero digit format), range[1, 3] or [01, 03]\n"
               "-fw image frame width (default = image width)\n"
               "-fh image frame height (default = image height)\n"
               "-ox x offset (default = 0)\n"
@@ -88,8 +91,8 @@ void Help(const String &message = String::EMPTY)
               "-outx output extension (default = sx, image filename ext)\n"
               "-v verbose output\n"
               "-h shows this help message\n\n"
-              "Example: SequenceImagePacker myfilepath -sp fire -sx png -ss 4 -se 32 -sf 2 -ox 22 -fh 40 -outx jpg\n\n"
-              "Any files missing in the sequence will not stop the program. You can get the warnings with '-v' option.\n"
+              "Example: SequenceImagePacker myfilepath -sp fire -sx png -ss 4 -se 32 -sf 02 -ox 22 -fh 40 -outx jpg\n\n"
+              "Any files missing in the sequence will not terminate the program. You can get the warnings with '-v' option.\n"
               "Output file will be placed in the inputFolderPath as prefixName'SEQ'.ext\n\n");
 }
 
@@ -129,6 +132,8 @@ void Run(Vector<String>& arguments)
     int seqStart = 0;
     int seqEnd = 0;
     int seqFormat = 1;
+    String strFormat;
+    bool hasLeadingZero = false;
     unsigned components = 0;
     int depth = 0;
 
@@ -157,7 +162,7 @@ void Run(Vector<String>& arguments)
             else if (arg == "-sx"  ) { seqExt = arguments[0]; arguments.Erase(0); }
             else if (arg == "-ss"  ) { seqStart = ToInt(arguments[0]); arguments.Erase(0); }
             else if (arg == "-se"  ) { seqEnd = ToInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-sf"  ) { seqFormat = ToInt(arguments[0]); arguments.Erase(0); }
+            else if (arg == "-sf"  ) { strFormat = arguments[0]; arguments.Erase(0); }
             else if (arg == "-fw"  ) { frameWidth = ToInt(arguments[0]); arguments.Erase(0); }
             else if (arg == "-fh"  ) { frameHeight = ToInt(arguments[0]); arguments.Erase(0); }
             else if (arg == "-ox"  ) { offsetX = ToInt(arguments[0]); arguments.Erase(0); }
@@ -178,7 +183,12 @@ void Run(Vector<String>& arguments)
     {
         ErrorExit("improper ss and/or se");
     }
-    
+
+    // check dec format
+    hasLeadingZero = strFormat.StartsWith("0");
+    const char *p = hasLeadingZero?strFormat.CString()+1:strFormat.CString();
+    seqFormat = Variant(VAR_INT, p).GetInt();
+
     if (seqFormat < 1 || seqFormat > 3)
     {
         ErrorExit("sf not in range");
@@ -212,7 +222,7 @@ void Run(Vector<String>& arguments)
     for ( int i = seqStart; i <= seqEnd; ++i )
     {
         char buff[16];
-        sprintf(buff, getSequenceDecFormat(seqFormat), i);
+        sprintf(buff, getSequenceDecFormat(seqFormat, hasLeadingZero), i);
         String filename = filePath + seqPrefix + String(buff) + "." + seqExt;
 
         if (!fileSystem->FileExists(filename))
@@ -351,7 +361,7 @@ void Run(Vector<String>& arguments)
         for ( int c = 0; c < cols && seq <= seqEnd; ++c, ++seq )
         {
             char buff[16];
-            sprintf(buff, getSequenceDecFormat(seqFormat), seq);
+            sprintf(buff, getSequenceDecFormat(seqFormat, hasLeadingZero), seq);
             String filename = filePath + seqPrefix + String(buff) + "." + seqExt;
 
             if (!fileSystem->FileExists(filename))
@@ -413,5 +423,10 @@ void Run(Vector<String>& arguments)
     String outstr = saved ? "File saved as: " : "Failed to save: ";
     outstr += GetPath(filename) + GetFileNameAndExtension(filename);
     PrintLine(outstr);
+
+    if (saved)
+    {
+        PrintLine("row " + String(rows) + ", col " + String(cols) + ", num images " + String(itotalFiles));
+    }
 }
 
