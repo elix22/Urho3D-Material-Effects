@@ -51,13 +51,12 @@ const char *getSequenceDecFormat(int idx, bool leadingZero)
     const char *dec1Format = "%1d";
     const char *dec2Format = "%2d";
     const char *dec3Format = "%3d";
-    const char *dec01Format = "%01d";
     const char *dec02Format = "%02d";
     const char *dec03Format = "%03d";
 
     if (idx == 1)
     {
-        return leadingZero?dec01Format:dec1Format;
+        return dec1Format;
     }
     else if (idx == 2)
     {
