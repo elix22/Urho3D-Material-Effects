@@ -388,7 +388,7 @@
 		<attribute name="Variables" />
 		<component type="StaticModel" id="52">
 			<attribute name="Model" value="Model;MaterialEffects/Models/pPlane4.mdl" />
-			<attribute name="Material" value="Material;MaterialEffects/Materials/waterGroundMat.xml" />
+			<attribute name="Material" value="Material;MaterialEffects/Materials/waterGroundSandMat.xml" />
 		</component>
 		<component type="RigidBody" id="60">
 			<attribute name="Physics Position" value="8.34918 0.51 -16.2874" />
