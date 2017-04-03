@@ -4,7 +4,7 @@
 Description
 -----------------------------------------------------------------------------------
 Basic material and techniques used for rendering effects, it might be useful for individuals new to Urho3D.
-In addition, added new water shader, fake BRDF, and per object glow effect. 
+In addition, added new water shader, fake BRDF, and post-processing glow per object per mask. 
 
 
 Screenshots
