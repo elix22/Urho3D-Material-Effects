@@ -84,13 +84,13 @@ bool SplashHandler::LoadSplashList(const String &strlist)
                 {
                     SharedPtr<SplashData> splashData( new SplashData(context_) );
                     if (splashData->LoadXML(xmlFile->GetRoot()))
-                        storedSplashList_.Push(splashData);
+                        registeredSplashList_.Push(splashData);
                 }
             }
         }
     }
 
-    if (storedSplashList_.Size() > 0)
+    if (registeredSplashList_.Size() > 0)
     {
         SubscribeToEvent(E_SPLASH, URHO3D_HANDLER(SplashHandler, HandleSplashEvent));
     }
@@ -160,26 +160,23 @@ void SplashHandler::HandleSplashEvent(StringHash eventType, VariantMap& eventDat
 	int sptype  = eventData[P_SPL1].GetInt();
 
     // create splash
-    if (sptype > Splash_Invalid && sptype < Splash_MAX)
+    for (unsigned i = 0; i < registeredSplashList_.Size(); ++i)
     {
-        for (unsigned i = 0; i < storedSplashList_.Size(); ++i)
+        if (registeredSplashList_[i]->splashType == sptype)
         {
-            if (storedSplashList_[i]->splashType == sptype)
+            SharedPtr<SplashData> newSplashData(new SplashData(context_));
+            newSplashData->Copy( registeredSplashList_[i] );
+
+            newSplashData->node = GetScene()->CreateChild();
+            newSplashData->node->SetPosition(pos);
+            newSplashData->node->SetDirection(Vector3::DOWN);
+
+            if (CreateDrawableObj(newSplashData))
             {
-                SharedPtr<SplashData> newSplashData(new SplashData(context_));
-                newSplashData->Copy( storedSplashList_[i] );
-
-                newSplashData->node = GetScene()->CreateChild();
-                newSplashData->node->SetPosition(pos);
-                newSplashData->node->SetDirection(Vector3::DOWN);
-
-                if (CreateDrawableObj(newSplashData))
-                {
-                    newSplashData->timer.Reset();
-                    activeSplashList_.Push(newSplashData);
-                }
-                break;
+                newSplashData->timer.Reset();
+                activeSplashList_.Push(newSplashData);
             }
+            break;
         }
     }
 }

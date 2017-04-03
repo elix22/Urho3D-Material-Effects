@@ -55,6 +55,7 @@
 #include "Character.h"
 #include "CharacterDemo.h"
 #include "SplashHandler.h"
+#include "UVSequencer.h"
 #include "Touch.h"
 #include "CollisionLayer.h"
 
@@ -71,12 +72,12 @@ CharacterDemo::CharacterDemo(Context* context)
     , drawDebug_(false)
 {
     SplashHandler::RegisterObject(context);
+    UVSequencer::RegisterObject(context);
     Character::RegisterObject(context);
 
     // emission
+    emissionColor_ = Color::BLACK;
     emissionState_ = EmissionState_R;
-    plateUOffset_ = 1.0f;
-    plateVOffset_ = 1.0f;
 
     // lightmap
     lightmapPathName_ = "Data/MaterialEffects/Textures/checkers-lightmap";
@@ -85,33 +86,6 @@ CharacterDemo::CharacterDemo(Context* context)
     // vcol
     vertIdx_ = 0;
     vcolColorIdx_ = 0;
-    
-    // torch
-    torchPathName_ = "Data/MaterialEffects/Textures/torch2/torch";
-    torchIdx_ = 58;
-    torchBegIdx_ = 58;
-    torchEndIdx_ = 139;
-
-    // explosion
-    explosionPathName_ = "Data/MaterialEffects/Textures/explosion2/explosion";
-    explosionIdx_ = 1;
-    explosionBegIdx_ = 1;
-    explosionEndIdx_ = 100;
-
-    // fire
-    firePathName_ = "Data/MaterialEffects/Textures/bgfire/bgfire";
-    fireIdx_ = 45;
-    fireBegIdx_ = 45;
-    fireEndIdx_ = 138;
-
-    // lava
-    lavaVOffset_ = 0.0f;
-
-    // waterfall
-    waterfall1VOffset_ = 0.0f;
-    waterfall2VOffset_ = 0.0f;
-    watergroundVOffset_ = 0.0f;
-
 }
 
 CharacterDemo::~CharacterDemo()
@@ -139,7 +113,10 @@ void CharacterDemo::Start()
 
     // Create static scene content
     CreateScene();
+
     InitSplashHandler();
+
+    CreateSequencers();
 
     CreateWaterRefection();
 
@@ -183,6 +160,7 @@ void CharacterDemo::CreateScene()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     Renderer* renderer = GetSubsystem<Renderer>();
+    Graphics* graphics = GetSubsystem<Graphics>();
 
     scene_ = new Scene(context_);
 
@@ -193,26 +171,79 @@ void CharacterDemo::CreateScene()
     SharedPtr<Viewport> viewport(new Viewport(context_, scene_, camera));
     renderer->SetViewport(0, viewport);
 
-    // emission/bloom
-    //SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
-    //effectRenderPath->Load(cache->GetResource<XMLFile>("RenderPaths/ForwardHWDepthBlurred.xml"));
-    //effectRenderPath->Load(cache->GetResource<XMLFile>("RenderPaths/DeferredHWDepthBlurred.xml"));
-    //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Bloom.xml"));
-    //effectRenderPath->SetShaderParameter("BloomMix", Vector2(0.9f, 0.5f));
-    //effectRenderPath->SetEnabled("Bloom", true);
-    //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
-    //effectRenderPath->SetEnabled("FXAA2", true);
-    //viewport->SetRenderPath(effectRenderPath);
+    // glow post processing
+    SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
+    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Glow.xml"));
+    effectRenderPath->SetEnabled("Glow", true);
+    effectRenderPath->SetShaderParameter("BlurHInvSize", Vector2(1.0f/(float)(graphics->GetWidth()), 1.0f/(float)(graphics->GetHeight())));
+    viewport->SetRenderPath(effectRenderPath);
 
     // load scene
     XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/Level1.xml");
     scene_->LoadXML(xmlLevel->GetRoot());
+
 }
 
 void CharacterDemo::InitSplashHandler()
 {
     SplashHandler *splashHandler = scene_->CreateComponent<SplashHandler>();
     splashHandler->LoadSplashList("Data/MaterialEffects/SplashData/splashDataList.xml");
+}
+
+void CharacterDemo::CreateSequencers()
+{
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+
+    // uv frame sequencers
+    Node *explNode = scene_->GetChild("explosion", true);
+    if (explNode)
+    {
+        UVSequencer *uvSequencer = explNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/explosionUVFrameSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
+    Node *fireNode = scene_->GetChild("bgfire", true);
+    if (fireNode)
+    {
+        UVSequencer *uvSequencer = fireNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/bgfireUVFrameSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
+    Node *torchNode = scene_->GetChild("torch", true);
+    if (torchNode)
+    {
+        UVSequencer *uvSequencer = torchNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/torchUVFrameSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
+    // uv scroll sequencers
+    Node *plateUNode = scene_->GetChild("transpPlateU", true);
+    if (plateUNode)
+    {
+        UVSequencer *uvSequencer = plateUNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/plateUScrollSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
+    Node *plateVNode = scene_->GetChild("transpPlateV", true);
+    if (plateVNode)
+    {
+        UVSequencer *uvSequencer = plateVNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/plateVScrollSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
+    Node *lavaUNode = scene_->GetChild("lava", true);
+    if (lavaUNode)
+    {
+        UVSequencer *uvSequencer = lavaUNode->CreateComponent<UVSequencer>();
+        XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/UVSequencerData/lavaVScrollSeqData.xml");
+        uvSequencer->LoadXML(xmlLevel->GetRoot());
+    }
+
 }
 
 void CharacterDemo::CreateCharacter()
@@ -251,6 +282,11 @@ void CharacterDemo::CreateCharacter()
 
     // character
     character_ = objectNode->CreateComponent<Character>();
+
+    // set rotation
+    character_->controls_.yaw_ = -199.7f;
+    character_->controls_.pitch_ = 1.19f;
+
 }
 
 void CharacterDemo::CreateWaterRefection()
@@ -378,10 +414,6 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     UpdateEmission(timeStep);
     UpdateLightmap(timeStep);
     UpdateVertexColor(timeStep);
-    UpdateTranspPlate(timeStep);
-    UpdateTorch(timeStep);
-    UpdateLava(timeStep);
-    UpdateWaterfall(timeStep);
 
     // Toggle debug geometry with space
     if (input->GetKeyPress(KEY_F4))
@@ -584,155 +616,6 @@ void CharacterDemo::UpdateVertexColor(float timeStep)
     }
 }
 
-void CharacterDemo::UpdateTranspPlate(float timeStep)
-{
-    // scroll u - right
-    Node *transpPlateNode = scene_->GetChild("transpPlateU", true);
-    if (transpPlateNode && transpPlateNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        plateUOffset_ -= 0.002f + timeStep;
-        if (plateUOffset_ < 0.0f)
-        {
-            plateUOffset_ = 1.0f;
-        }
 
-        Material *mat = transpPlateNode->GetComponent<StaticModel>()->GetMaterial();
-        mat->SetShaderParameter("UOffset", Vector4(1.0f, 0.0f, 0.0f, plateUOffset_));
-    }
-
-    // scroll v - down
-    transpPlateNode = scene_->GetChild("transpPlateV", true);
-    if (transpPlateNode && transpPlateNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        plateVOffset_ -= 0.002f + timeStep;
-        if (plateVOffset_ < 0.0f)
-        {
-            plateVOffset_ = 1.0f;
-        }
-
-        Material *mat = transpPlateNode->GetComponent<StaticModel>()->GetMaterial();
-        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, plateVOffset_));
-    }
-}
-
-void CharacterDemo::UpdateTorch(float timeStep)
-{
-    Node *filmNode = scene_->GetChild("Torch", true);
-    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        if (torchTimer_.GetMSec(false) > 40)
-        {
-            if (++torchIdx_ > torchEndIdx_)
-            {
-                torchIdx_ = torchBegIdx_;
-            }
-            char buf[10];
-            sprintf(buf, "%03d.png", torchIdx_);
-            String diffName = torchPathName_ + String(buf);
-
-            // update texture
-            ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
-            mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-
-            torchTimer_.Reset();
-        }
-    }
-
-    filmNode = scene_->GetChild("explosion", true);
-    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        if (explosionTimer_.GetMSec(false) > 20)
-        {
-            if (++explosionIdx_ > explosionEndIdx_)
-            {
-                explosionIdx_ = explosionBegIdx_;
-            }
-            char buf[10];
-            sprintf(buf, "%03d.png", explosionIdx_);
-            String diffName = explosionPathName_ + String(buf);
-
-            // update texture
-            ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
-            mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-
-            explosionTimer_.Reset();
-        }
-    }
-
-    filmNode = scene_->GetChild("bgfire", true);
-    if (filmNode && filmNode->GetComponent<BillboardSet>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        if (fireTimer_.GetMSec(false) > 20)
-        {
-            if (++fireIdx_ > fireEndIdx_)
-            {
-                fireIdx_ = fireBegIdx_;
-            }
-            char buf[10];
-            sprintf(buf, "%03d.png", fireIdx_);
-            String diffName = firePathName_ + String(buf);
-
-            // update texture
-            ResourceCache* cache = GetSubsystem<ResourceCache>();
-            Material *mat = filmNode->GetComponent<BillboardSet>()->GetMaterial();
-            mat->SetTexture(TU_DIFFUSE, cache->GetResource<Texture2D>(diffName));
-
-            fireTimer_.Reset();
-        }
-    }
-
-}
-
-void CharacterDemo::UpdateLava(float timeStep)
-{
-    // scroll v - down
-    Node *lavaNode = scene_->GetChild("lava", true);
-    if (lavaNode && lavaNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-
-        lavaVOffset_ -= 0.00002f + timeStep * 0.01f;
-        if (lavaVOffset_ < 0.0f)
-        {
-            lavaVOffset_ = 1.0f;
-        }
-
-        Material *mat = lavaNode->GetComponent<StaticModel>()->GetMaterial();
-        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, lavaVOffset_));
-    }
-}
-
-void CharacterDemo::UpdateWaterfall(float timeStep)
-{
-    Node *waterfallNode = scene_->GetChild("waterfall2", true);
-    if (waterfallNode && waterfallNode->GetComponent<StaticModel>()->IsInView(cameraNode_->GetComponent<Camera>()))
-    {
-        // scroll v - down
-        waterfall1VOffset_ -= 0.003f + timeStep * 0.1f;
-        if (waterfall1VOffset_ < 0.0f)
-        {
-            waterfall1VOffset_ = 1.0f;
-        }
-
-        Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
-        mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall1VOffset_));
-
-
-        // waterfall #2
-        waterfall2VOffset_ -= 0.001f + timeStep * 0.1f;
-        if (waterfall2VOffset_ < 0.0f)
-        {
-            waterfall2VOffset_ = 1.0f;
-        }
-        waterfallNode = scene_->GetChild("waterfall1", true);
-
-        if (waterfallNode)
-        {
-            Material *mat = waterfallNode->GetComponent<StaticModel>()->GetMaterial();
-            mat->SetShaderParameter("VOffset", Vector4(0.0f, 1.0f, 0.0f, waterfall2VOffset_));
-        }
-    }
-}
 
 

@@ -132,15 +132,12 @@ protected:
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
     void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 
+    void CreateSequencers();
     void CreateWaterRefection();
 
     void UpdateEmission(float timeStep);
     void UpdateLightmap(float timeStep);
     void UpdateVertexColor(float timeStep);
-    void UpdateTranspPlate(float timeStep);
-    void UpdateTorch(float timeStep);
-    void UpdateLava(float timeStep);
-    void UpdateWaterfall(float timeStep);
 
 protected:
     /// Touch utility object.
@@ -164,40 +161,6 @@ protected:
     int      vcolColorIdx_;
     unsigned vertIdx_;
     Timer    vcolTimer_;
-
-    // trans plate
-    float plateUOffset_;
-    float plateVOffset_;
-
-    // torch
-    String torchPathName_;
-    int    torchIdx_;
-    int    torchBegIdx_;
-    int    torchEndIdx_;
-    Timer  torchTimer_;
-
-    // explosion
-    String explosionPathName_;
-    int    explosionIdx_;
-    int    explosionBegIdx_;
-    int    explosionEndIdx_;
-    Timer  explosionTimer_;
-
-    // fire
-    String firePathName_;
-    int    fireIdx_;
-    int    fireBegIdx_;
-    int    fireEndIdx_;
-    Timer  fireTimer_;
-
-    // lava
-    float lavaVOffset_;
-
-    // waterfall
-    float waterfall1VOffset_;
-    float waterfall2VOffset_;
-    float watergroundVOffset_;
-    bool  watergroundMoveFwd_;
 
     // water reflection
     SharedPtr<Node> reflectionCameraNode_;

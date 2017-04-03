@@ -60,7 +60,7 @@ void PS()
 
     vec4 nbump = texture2D(sNormalMap, vWaterUV.xy);
     vec4 nbump2 = texture2D(sNormalMap, vWaterUV.zw);
-    nbump = (nbump + nbump2) * 0.5;
+    nbump = (nbump  + nbump2) * 0.5;
     vec2 noise = (nbump.rg - 0.5) * cNoiseStrength;
     refractUV += noise;
     // Do not shift reflect UV coordinate upward, because it will reveal the clipping of geometry below water

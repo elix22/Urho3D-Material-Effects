@@ -302,6 +302,11 @@ void Run(Vector<String>& arguments)
         ++itotalFiles;
     }
 
+    if (itotalFiles == 0)
+    {
+        ErrorExit("didn't find any files to open");
+    }
+
     if (verbose)
     {
         PrintLine("Num image files to pack: " + String(itotalFiles));

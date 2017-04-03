@@ -126,7 +126,7 @@ protected:
     void HandleSplashEvent(StringHash eventType, VariantMap& eventData);
 
 protected:
-    Vector<SharedPtr<SplashData> > storedSplashList_;
+    Vector<SharedPtr<SplashData> > registeredSplashList_;
     Vector<SharedPtr<SplashData> > activeSplashList_;
 };
 
