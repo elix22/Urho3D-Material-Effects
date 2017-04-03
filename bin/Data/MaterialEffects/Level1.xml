@@ -6,9 +6,9 @@
 	<attribute name="Snap Threshold" value="5" />
 	<attribute name="Elapsed Time" value="0" />
 	<attribute name="Next Replicated Node ID" value="34" />
-	<attribute name="Next Replicated Component ID" value="68" />
-	<attribute name="Next Local Node ID" value="16777252" />
-	<attribute name="Next Local Component ID" value="16777648" />
+	<attribute name="Next Replicated Component ID" value="77" />
+	<attribute name="Next Local Node ID" value="16777253" />
+	<attribute name="Next Local Component ID" value="16777660" />
 	<attribute name="Variables" />
 	<attribute name="Variable Names" value="" />
 	<component type="PhysicsWorld" id="1" />
@@ -225,7 +225,7 @@
 			<attribute name="Tags" />
 			<attribute name="Position" value="0 1.41034 0" />
 			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="0.48 1.0 1" />
+			<attribute name="Scale" value="0.48 1 1" />
 			<attribute name="Variables" />
 			<component type="BillboardSet" id="37">
 				<attribute name="Material" value="Material;MaterialEffects/Materials/torchUVFrame.xml" />
@@ -304,23 +304,13 @@
 			<attribute name="Is Enabled" value="true" />
 			<attribute name="Name" value="bgfire" />
 			<attribute name="Tags" />
-			<attribute name="Position" value="0 1.51034 0" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="2 1 1" />
+			<attribute name="Position" value="0 2.53708 0" />
+			<attribute name="Rotation" value="0.707107 0 0.707107 0" />
+			<attribute name="Scale" value="1.0 2.0 0.4" />
 			<attribute name="Variables" />
-			<component type="BillboardSet" id="47">
+			<component type="StaticModel" id="76">
+				<attribute name="Model" value="Model;MaterialEffects/Models/fireDrum.mdl" />
 				<attribute name="Material" value="Material;MaterialEffects/Materials/bgfireUVFrame.xml" />
-				<attribute name="Face Camera Mode" value="Rotate Y" />
-				<attribute name="Billboards">
-					<variant type="Int" value="1" />
-					<variant type="Vector3" value="0 0 0" />
-					<variant type="Vector2" value="1 1" />
-					<variant type="Vector4" value="0 0 1 1" />
-					<variant type="Color" value="1 1 1 1" />
-					<variant type="Float" value="0" />
-					<variant type="Vector3" value="0 1 0" />
-					<variant type="Bool" value="true" />
-				</attribute>
 			</component>
 		</node>
 	</node>
