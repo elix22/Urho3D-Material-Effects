@@ -5,6 +5,8 @@
 #include "Lighting.glsl"
 #include "Fog.glsl"
 
+uniform float cBRDFAttenuation;
+
 varying vec4 vEyeVec;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
@@ -36,7 +38,7 @@ vec4 GetBRDFMapColor(sampler2D brdfmap, vec3 normal, vec3 eyeVec, vec3 lightDir,
 
     // there are cases where polygon's vert normal is adjusted 
     // such that the dot product with the eyevec < 0 - take abs() val
-    float NdotV = abs(dot(normal, normalize(eyeVec)));
+    float NdotV = abs(dot(normal, eyeVec));
     vec3 brdf = texture2D(brdfmap, vec2(NdotL, 1.0 - NdotV)).rgb;
      
     return vec4(brdf * atten, atten);
@@ -88,24 +90,28 @@ void PS()
         vec3 normal = normalize(vNormal);
     #endif
 
-    // fake BRDF objects do not get affected by light and will not use the
-    // diff var returned from GetDiffuse() function, just need the lightDir
-    vec3 lightDir;
-    GetDiffuse(normal, vWorldPos.xyz, lightDir);
+        float diff = 1.0;
+        vec3 lightDir = vec3(0, -1, 0);
+    #ifdef PERPIXEL
+        // Per-pixel forward lighting
+        // fake BRDF objects do not get diffused by light, but do get shadowed, and will not use the
+        // diff var returned from GetDiffuse() function, just need the lightDir
+        GetDiffuse(normal, vWorldPos.xyz, lightDir);
 
-    float diff = 1.0;
-    #ifdef SHADOW
-        diff *= GetShadow(vShadowPos, vWorldPos.w);
+        #ifdef SHADOW
+            diff *= GetShadow(vShadowPos, vWorldPos.w);
+        #endif
     #endif
+
+    vec3 eyeVec = normalize(vEyeVec.xyz);
+    vec4 brdfCol = GetBRDFMapColor(sEmissiveMap, normal, eyeVec, lightDir, cBRDFAttenuation);
+    vec3 finalColor = diff * diffColor.rgb * brdfCol.rgb;
 
     #ifdef HEIGHTFOG
         float fogFactor = GetHeightFogFactor(vWorldPos.w, vWorldPos.y);
     #else
         float fogFactor = GetFogFactor(vWorldPos.w);
     #endif
-
-    vec4 brdfCol = GetBRDFMapColor(sEmissiveMap, normal, vEyeVec.xyz, lightDir, 1.0);
-    vec3 finalColor = diff * diffColor.rgb * brdfCol.rgb;
 
     gl_FragColor = vec4(GetLitFog(finalColor, fogFactor), 1.0);
 }

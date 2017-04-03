@@ -5,6 +5,8 @@
 #include "Lighting.hlsl"
 #include "Fog.hlsl"
 
+uniform float cBRDFAttenuation;
+
 //=============================================================================
 // reference
 // https://alastaira.wordpress.com/2013/11/26/lighting-models-and-brdf-maps/
@@ -18,7 +20,7 @@ float4 GetBRDFMapColor(sampler2D brdfmap, float3 normal, float3 eyeVec, float3 l
 
     // there are cases where polygon's vert normal is adjusted 
     // such that the dot product with the eyevec < 0 - take abs() val
-    float NdotV = abs(dot(normal, normalize(eyeVec)));
+    float NdotV = abs(dot(normal, eyeVec));
     float3 brdf = tex2D(brdfmap, float2(NdotL, 1.0 - NdotV)).rgb;
      
     return float4(brdf * atten, atten);
@@ -107,16 +109,22 @@ void PS(
         float3 normal = normalize(iNormal);
     #endif
 
-    // fake BRDF objects do not get affected by light and will not use the
-    // diff var returned from GetDiffuse() function, just need the lightDir
-    float3 lightDir;
-    GetDiffuse(normal, iWorldPos.xyz, lightDir);
+        float diff = 1.0;
+        float3 lightDir = float3(0, -1, 0);
+    #ifdef PERPIXEL
+        // Per-pixel forward lighting
+        // fake BRDF objects do not get diffused by light, but do get shadowed, and will not use the
+        // diff var returned from GetDiffuse() function, just need the lightDir
+        GetDiffuse(normal, iWorldPos.xyz, lightDir);
 
-    float diff = 1.0;
-
-    #ifdef SHADOW
-        diff *= GetShadow(iShadowPos, iWorldPos.w);
+        #ifdef SHADOW
+            diff *= GetShadow(iShadowPos, iWorldPos.w);
+        #endif
     #endif
+
+    float3 eyeVec = normalize(cCameraPosPS - iWorldPos.xyz);
+    float4 brdfCol = GetBRDFMapColor(sEmissiveMap, normal, eyeVec, lightDir, cBRDFAttenuation);
+    float3 finalColor = diff * diffColor.rgb * brdfCol.rgb;
 
     // Get fog factor
     #ifdef HEIGHTFOG
@@ -125,10 +133,7 @@ void PS(
         float fogFactor = GetFogFactor(iWorldPos.w);
     #endif
 
-    float3 eyeVec = cCameraPosPS - iWorldPos.xyz;
-    float4 brdfCol = GetBRDFMapColor(sEmissiveMap, normal, eyeVec, lightDir, 1.0);
-    float3 finalColor = diff * diffColor.rgb * brdfCol.rgb;
-
-    oColor = float4(GetFog(finalColor, fogFactor), diffColor.a);
+    oColor = float4(GetFog(finalColor, fogFactor), 1.0);
 
 }
+
