@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <material>
 	<technique name="Techniques/DiffUnlitAlphaMaskUVFrames.xml" />
-	<texture unit="diffuse" name="MaterialEffects/Textures/torch3/torchSEQ.jpg" />
+	<texture unit="diffuse" name="MaterialEffects/Textures/torch3/torchSEQres2.jpg" />
 	<texture unit="specular" name="MaterialEffects/Textures/torch3/torchEdgeMask.png" />
 	<parameter name="MatDiffColor" value="1 1 1 1" />
 	<parameter name="MatEmissiveColor" value="1 1 1 1" />
