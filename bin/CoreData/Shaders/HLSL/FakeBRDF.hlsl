@@ -20,12 +20,11 @@ float4 GetBRDFMapColor(sampler2D brdfmap, float3 normal, float3 eyeVec, float3 l
 
     // there are cases where polygon's vert normal is adjusted 
     // such that the dot product with the eyevec < 0 - take abs() val
-    float NdotV = abs(dot(normal, eyeVec));
+    float NdotV = clamp(abs(dot(normal, eyeVec)), 0.02, 1.0);
     float3 brdf = tex2D(brdfmap, float2(NdotL, 1.0 - NdotV)).rgb;
      
     return float4(brdf * atten, atten);
 }
-
 
 void VS(float4 iPos : POSITION,
         float3 iNormal : NORMAL,
