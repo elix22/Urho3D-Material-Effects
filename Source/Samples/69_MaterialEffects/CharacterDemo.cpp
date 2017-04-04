@@ -174,14 +174,33 @@ void CharacterDemo::CreateScene()
     // glow post processing
     SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Glow.xml"));
+    Vector2 divisorSize;
+
+    // find texture size scaler
+    for ( unsigned i = 0; effectRenderPath->renderTargets_.Size(); ++i )
+    {
+        const RenderTargetInfo &rtInfo = effectRenderPath->renderTargets_[i];
+        if (rtInfo.name_ == "blurh")
+        {
+            divisorSize = rtInfo.size_;
+            break;
+        }
+    }
+
+    // set BlurHInvSize to proper value
+    // **note** be sure to do this if screen size changes (not done for this demo)
+    if (divisorSize != Vector2::ZERO)
+    {
+        divisorSize *= Vector2(1.0f/(float)(graphics->GetWidth()), 1.0f/(float)(graphics->GetHeight()));
+        effectRenderPath->SetShaderParameter("BlurHInvSize", divisorSize);
+    }
+
     effectRenderPath->SetEnabled("Glow", true);
-    effectRenderPath->SetShaderParameter("BlurHInvSize", Vector2(1.0f/(float)(graphics->GetWidth()), 1.0f/(float)(graphics->GetHeight())));
     viewport->SetRenderPath(effectRenderPath);
 
     // load scene
     XMLFile *xmlLevel = cache->GetResource<XMLFile>("Data/MaterialEffects/Level1.xml");
     scene_->LoadXML(xmlLevel->GetRoot());
-
 }
 
 void CharacterDemo::InitSplashHandler()

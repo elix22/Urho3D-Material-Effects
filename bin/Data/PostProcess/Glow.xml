@@ -40,28 +40,28 @@
     <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR5" output="blurh">
         <parameter name="BlurHInvSize" value="0.00125 0.00167" /> 
         <parameter name="BlurDir" value="1.0 0.0" />
-        <parameter name="BlurRadius" value="2.0" />
+        <parameter name="BlurRadius" value="1.0" />
         <parameter name="BlurSigma" value="2.0" />
         <texture unit="diffuse" name="viewport" />
     </command>
     <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR5" output="blurv">
         <parameter name="BlurHInvSize" value="0.00125 0.00167" /> 
         <parameter name="BlurDir" value="0.0 1.0" />
-        <parameter name="BlurRadius" value="2.0" />
+        <parameter name="BlurRadius" value="1.0" />
         <parameter name="BlurSigma" value="2.0" />
         <texture unit="diffuse" name="blurh" />
     </command>
-    <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR5" output="blurh">
+    <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR3" output="blurh">
         <parameter name="BlurHInvSize" value="0.00125 0.00167" /> 
         <parameter name="BlurDir" value="1.0 0.0" />
-        <parameter name="BlurRadius" value="2.0" />
+        <parameter name="BlurRadius" value="1.0" />
         <parameter name="BlurSigma" value="2.0" />
         <texture unit="diffuse" name="blurv" />
     </command>
-    <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR5" output="blurv">
+    <command type="quad" tag="Glow" vs="Blur" ps="Blur" psdefines="BLUR3" output="blurv">
         <parameter name="BlurHInvSize" value="0.00125 0.00167" /> 
         <parameter name="BlurDir" value="0.0 1.0" />
-        <parameter name="BlurRadius" value="2.0" />
+        <parameter name="BlurRadius" value="1.0" />
         <parameter name="BlurSigma" value="2.0" />
         <texture unit="diffuse" name="blurh" />
     </command>
