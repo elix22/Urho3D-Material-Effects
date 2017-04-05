@@ -38,7 +38,7 @@ vec4 GetBRDFMapColor(sampler2D brdfmap, vec3 normal, vec3 eyeVec, vec3 lightDir,
 
     // there are cases where polygon's vert normal is adjusted 
     // such that the dot product with the eyevec < 0 - take abs() val
-    float NdotV = clamp(abs(dot(normal, eyeVec)), 0.02, 1.0);
+    float NdotV = clamp(abs(dot(normal, eyeVec)), 0.02, 0.98);
     vec3 brdf = texture2D(brdfmap, vec2(NdotL, 1.0 - NdotV)).rgb;
      
     return vec4(brdf * atten, atten);
